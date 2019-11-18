@@ -26,6 +26,10 @@ func New() *ClientCore {
 	return client
 }
 
+func (c *ClientCore) Debrid(link string) {
+	c.Alldebrid.PrintDebrid(link)
+}
+
 func (c *ClientCore) Download(link string) []string {
 	urls := c.Alldebrid.Debrid(link)
 	c.Aria2.AddUrl(urls)
@@ -41,6 +45,7 @@ func (c *ClientCore) StartApi() {
 
 	// Routes
 	e.GET("/download", c.HandlerDownload)
+	e.GET("/unlock", c.HandlerFormDownload)
 
 	// Start server
 	e.Logger.Fatal(e.Start(c.Config.GetAddress())) // ":1234"
@@ -48,6 +53,16 @@ func (c *ClientCore) StartApi() {
 
 func (client *ClientCore) HandlerDownload(c echo.Context) error {
 	url := c.QueryParam("url")
-	urls := client.Download(url)
-	return c.String(http.StatusOK, strings.Join(urls, ", <br/> "))
+	token := c.QueryParam("token")
+	if token == client.Config.GetToken() {
+		urls := client.Download(url)
+		return c.HTML(http.StatusOK, strings.Join(urls, ", <br/> "))
+	} else {
+		return c.HTML(http.StatusUnauthorized, "token error")
+	}
+}
+
+func (client *ClientCore) HandlerFormDownload(c echo.Context) error {
+	form := `<html><body><form action="./download" method="get" > <div> <label for="token">Token &nbsp;:</label> <input type="token" name="token" id="token" required style="width:200px;" > </div><div> <label for="name">Link &nbsp;&nbsp; :</label> <input type="text" name="url" id="url" required style="width:600px;"> </div><div> <input type="submit" value="Download"> </div></form></body></html>`
+	return c.HTML(http.StatusOK, form)
 }

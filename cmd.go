@@ -12,8 +12,9 @@ type Options struct {
 	Aria2Url    func(string) `short:"u" long:"aria2-url" description:"url aria2 server"`
 	Aria2Secret func(string) `short:"s" long:"aria2-secret" description:"secret aria2 server"`
 	Port        func(string) `short:"a" long:"address" description:"address of http service debrid >  :8080"`
-	Daemon      func()       `short:"h" long:"http" description:"start http server"`
+	Daemon      func()       `short:"p" long:"http" description:"start http server"`
 	Download    func(string) `short:"d" long:"download" description:"start download on aria2 one [url]"`
+	Debrid      func(string) `short:"b" long:"debrid" description:"debrid url [url]"`
 }
 
 var options Options
@@ -43,5 +44,9 @@ func init() {
 	options.Download = func(url string) {
 		client := core.New()
 		client.Download(url)
+	}
+	options.Debrid = func(url string) {
+		client := core.New()
+		client.Debrid(url)
 	}
 }

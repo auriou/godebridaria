@@ -71,7 +71,7 @@ func (c *ClientConfig) IsActivated() bool {
 	return c.Config.Activate.Activated
 }
 
-func (c *ClientConfig) GetToken() string {
+func (c *ClientConfig) GetDebridToken() string {
 	return c.Config.Activate.Token
 }
 
@@ -89,4 +89,8 @@ func (c *ClientConfig) GetAria2Secret() string {
 
 func (c *ClientConfig) GetAddress() string {
 	return c.Config.Address
+}
+
+func (c *ClientConfig) GetToken() string {
+	return c.Config.Token
 }

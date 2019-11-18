@@ -35,7 +35,7 @@ func (c *ClientAlldebrid) GetReq(path string, queries Queries) *http.Request {
 			q.Add(k, v)
 		}
 		if c.ContextConfig.IsActivated() {
-			q.Set("token", c.ContextConfig.GetToken())
+			q.Set("token", c.ContextConfig.GetDebridToken())
 		}
 		req.URL.RawQuery = q.Encode()
 	}
