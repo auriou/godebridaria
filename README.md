@@ -1,6 +1,3 @@
 # godebridaria
 
-set GOARCH=amd64
-set GOOS=linux
-go tool dist install -v pkg/runtime
-go install -v -a std
+Unlocks links through its alldebrid account and sends them to the aria2 server for download
