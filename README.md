@@ -46,8 +46,11 @@ Your config save into data.json
 
 ```
 
+---
 
-go env
-$env:GOOS = "linux"
-$env:GOARCH = "arm"
+RASPBERRY 
+
+> go env <br>
+$env:GOOS = "linux"<br>
+$env:GOARCH = "arm"<br>
 go build
