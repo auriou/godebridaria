@@ -54,3 +54,13 @@ RASPBERRY
 $env:GOOS = "linux"<br>
 $env:GOARCH = "arm"<br>
 go build
+
+LINUX 
+
+> go env <br>
+$env:GOOS = "linux"<br>
+$env:GOARCH = "amd64"<br>
+go build
+
+
+https://godoc.org/github.com/takama/daemon

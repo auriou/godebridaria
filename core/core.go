@@ -2,6 +2,7 @@ package core
 
 import (
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/auriou/godebridaria/alldebrid"
@@ -36,12 +37,26 @@ func (c *ClientCore) Download(link string) []string {
 	return urls
 }
 
+func checkErr(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 func (c *ClientCore) StartApi() {
+	f, err := os.OpenFile("debrid.log",
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	checkErr(err)
+	defer f.Close()
+
 	e := echo.New()
 
 	// Middleware
-	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: `{"time":"${time_rfc3339_nano}","ip":"${remote_ip}",` +
+			`"method":"${method}","uri":"${uri}","status":${status},"error":"${error}"}` + "\n",
+		Output: f}))
 
 	// Routes
 	e.GET("/download", c.HandlerDownload)

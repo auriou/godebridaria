@@ -19,6 +19,7 @@ func New(cfg *config.ClientConfig) *ClientAlldebrid {
 		HTTPClient:    http.DefaultClient,
 		ContextConfig: cfg,
 	}
+	client.GetHosts()
 	return client
 }
 
@@ -40,6 +41,20 @@ func (c *ClientAlldebrid) GetReq(path string, queries Queries) *http.Request {
 		req.URL.RawQuery = q.Encode()
 	}
 	return req
+}
+
+func (c *ClientAlldebrid) GetHosts() (*models.DebridDomains, error) {
+	res, err := c.HTTPClient.Do(c.GetReq("/hosts", nil))
+	hosts := &models.DebridDomains{}
+	err = json.NewDecoder(res.Body).Decode(hosts)
+	if err != nil {
+		return nil, err
+	}
+	if !hosts.Success {
+		return nil, errors.New("error : get hosts request")
+	}
+	c.ContextConfig.SaveHosts(hosts)
+	return hosts, nil
 }
 
 func (c *ClientAlldebrid) GetActivate() (*models.PinResponse, error) {
@@ -144,20 +159,33 @@ func (c *ClientAlldebrid) Unlock(link string) (*models.DownloadLink, error) {
 }
 
 func (c *ClientAlldebrid) PrintDebrid(link string) {
-	redirect, _ := c.Redirector(link)
-	for _, value := range redirect.Links {
-		link, _ := c.Unlock(value)
-		fmt.Println("URL :", value)
-		fmt.Println("   + UNLOCK : ", link.Infos.Link)
+	debridType := c.ContextConfig.GetHostType(link)
+	if debridType == 1 {
+		redirect, _ := c.Redirector(link)
+		for _, value := range redirect.Links {
+			linkDebrid, _ := c.Unlock(value)
+			fmt.Println("URL :", value)
+			fmt.Println("   + UNLOCK : ", linkDebrid.Infos.Link)
+		}
+	} else if debridType == 2 {
+		linkDebrid, _ := c.Unlock(link)
+		fmt.Println("URL :", link)
+		fmt.Println("   + UNLOCK : ", linkDebrid.Infos.Link)
 	}
 }
 
 func (c *ClientAlldebrid) Debrid(link string) []string {
 	tab := make([]string, 0)
-	redirect, _ := c.Redirector(link)
-	for _, value := range redirect.Links {
-		link, _ := c.Unlock(value)
-		tab = append(tab, link.Infos.Link)
+	debridType := c.ContextConfig.GetHostType(link)
+	if debridType == 1 {
+		redirect, _ := c.Redirector(link)
+		for _, value := range redirect.Links {
+			linkDebrid, _ := c.Unlock(value)
+			tab = append(tab, linkDebrid.Infos.Link)
+		}
+	} else if debridType == 2 {
+		linkDebrid, _ := c.Unlock(link)
+		tab = append(tab, linkDebrid.Infos.Link)
 	}
 	return tab
 }

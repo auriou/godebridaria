@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
 
 	"github.com/auriou/godebridaria/models"
@@ -45,6 +46,34 @@ func (c *ClientConfig) Read() error {
 func (c *ClientConfig) SaveActivePin(activate *models.ActivePinResponse) {
 	c.Config.Activate = activate
 	c.Save()
+}
+
+func (c *ClientConfig) SaveHosts(hosts *models.DebridDomains) {
+	c.Hosts = hosts
+}
+
+func (c *ClientConfig) GetHostType(link string) int {
+	urlAsk, _ := url.Parse(link)
+	for _, host := range c.Hosts.Hosts {
+		if host.Status {
+			if host.Domain == urlAsk.Host {
+				return 2
+			}
+			for _, altHost := range host.AltDomains {
+				if altHost == urlAsk.Host {
+					return 2
+				}
+			}
+		}
+	}
+	for _, host := range c.Hosts.Redirectors {
+		if host.Status {
+			if host.Domain == urlAsk.Host {
+				return 1
+			}
+		}
+	}
+	return 0
 }
 
 func (c *ClientConfig) SavePin(pin *models.PinResponse) {
