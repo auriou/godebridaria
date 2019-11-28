@@ -12,6 +12,9 @@ import (
 	"github.com/labstack/echo/middleware"
 )
 
+var header = "<!doctype html><html lang='en'><head> <meta charset='utf-8'> <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'> <title>Download</title> <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' integrity='sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm' crossorigin='anonymous'> <link href='style.css' rel='stylesheet'></head><body class='text-center'> <form class='form-download' action='unlock' role='form' method='GET' class='form-horizontal'> <ul class='list-group'> <h5>"
+var footer = " </h5> </ul> <div class='form-group'> <button class='btn btn-lg btn-primary btn-block' type='submit'>Download other files</button> </div></form></body></body></html>"
+
 type ClientCore struct {
 	Alldebrid *alldebrid.ClientAlldebrid
 	Aria2     *aria2.ClientAria2
@@ -58,26 +61,31 @@ func (c *ClientCore) StartApi() {
 			`"method":"${method}","uri":"${uri}","status":${status},"error":"${error}"}` + "\n",
 		Output: f}))
 
+	e.Static("/", "assets")
 	// Routes
-	e.GET("/download", c.HandlerDownload)
-	e.GET("/unlock", c.HandlerFormDownload)
+	e.POST("/download", c.HandlerDownloadPost)
 
 	// Start server
 	e.Logger.Fatal(e.Start(c.Config.GetAddress())) // ":1234"
 }
 
-func (client *ClientCore) HandlerDownload(c echo.Context) error {
-	url := c.QueryParam("url")
-	token := c.QueryParam("token")
+func (client *ClientCore) HandlerDownloadPost(c echo.Context) error {
+	token := c.FormValue("token")
+	urlsForm := c.FormValue("urls")
 	if token == client.Config.GetToken() {
-		urls := client.Download(url)
-		return c.HTML(http.StatusOK, strings.Join(urls, ", <br/> "))
+		result := header
+		askurls := strings.Split(strings.Replace(urlsForm, "\r\n", "\n", -1), "\n")
+		for _, askurl := range askurls {
+			urls := client.Download(askurl)
+			for _, url := range urls {
+				result += "<li class='list-group-item d-flex justify-content-between align-items-center'>" + url +
+					"<span class='badge badge-success badge-pill'>OK</span></li>"
+			}
+		}
+		result += footer
+
+		return c.HTML(http.StatusOK, result)
 	} else {
 		return c.HTML(http.StatusUnauthorized, "token error")
 	}
-}
-
-func (client *ClientCore) HandlerFormDownload(c echo.Context) error {
-	form := `<html><body><form action="./download" method="get" > <div> <label for="token">Token &nbsp;:</label> <input type="token" name="token" id="token" required style="width:200px;" > </div><div> <label for="name">Link &nbsp;&nbsp; :</label> <input type="text" name="url" id="url" required style="width:600px;"> </div><div> <input type="submit" value="Download"> </div></form></body></html>`
-	return c.HTML(http.StatusOK, form)
 }
