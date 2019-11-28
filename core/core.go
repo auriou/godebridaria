@@ -14,6 +14,8 @@ import (
 
 var header = "<!doctype html><html lang='en'><head> <meta charset='utf-8'> <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'> <title>Download</title> <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' integrity='sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm' crossorigin='anonymous'> <link href='style.css' rel='stylesheet'></head><body class='text-center'> <form class='form-download' action='unlock' role='form' method='GET' class='form-horizontal'> <ul class='list-group'> <h5>"
 var footer = " </h5> </ul> <div class='form-group'> <button class='btn btn-lg btn-primary btn-block' type='submit'>Download other files</button> </div></form></body></body></html>"
+var css = "html,body{height: 100%;}body{display: -ms-flexbox; display: -webkit-box; display: flex; -ms-flex-align: center; -ms-flex-pack: center; -webkit-box-align: center; align-items: center; -webkit-box-pack: center; justify-content: center; padding-top: 40px; padding-bottom: 40px; background-color: #f5f5f5;}.form-download{width: 80%; max-width: 800px; padding: 15px; margin: 0 auto;}.form-download .form-control{position: relative; box-sizing: border-box; height: auto; padding: 10px; font-size: 16px;}.form-download .form-control:focus{z-index: 2;}.form-download textarea{margin-bottom: -1px; border-bottom-right-radius: 0; border-bottom-left-radius: 0;}.form-download input[type='password']{margin-bottom: 10px; border-top-left-radius: 0; border-top-right-radius: 0;}.form-download button{border-top-left-radius: 2; border-top-right-radius: 2;}"
+var unlock = "<!doctype html><html lang='en'><head> <meta charset='utf-8'> <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'> <title>Download</title> <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' integrity='sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm' crossorigin='anonymous'> <link href='style.css' rel='stylesheet'></head><body class='text-center'> <form class='form-download' action='download' role='form' method='POST' class='form-horizontal'> <h1 class='h3 mb-3 font-weight-normal'>Debrid Aria2</h1> <div class='form-group'> <label for='token' class='sr-only'>Token</label> <input type='password' id='token' class='form-control' name='token' placeholder='Token' required> </div><div class='form-group'> <label for='urls' class='sr-only'>Urls</label> <textarea class='form-control' id='urls' rows='7' placeholder='Urls' name='urls' required></textarea> </div><div class='form-group'> <button class='btn btn-lg btn-primary btn-block' type='submit'>Download</button> </div></form></body></html>"
 
 type ClientCore struct {
 	Alldebrid *alldebrid.ClientAlldebrid
@@ -63,13 +65,15 @@ func (c *ClientCore) StartApi() {
 
 	e.Static("/", "assets")
 	// Routes
-	e.POST("/download", c.HandlerDownloadPost)
+	e.POST("/download", c.HandlerDownload)
+	e.GET("/unlock", c.HandlerUnlock)
+	e.GET("/style.css", c.HandlerCss)
 
 	// Start server
 	e.Logger.Fatal(e.Start(c.Config.GetAddress())) // ":1234"
 }
 
-func (client *ClientCore) HandlerDownloadPost(c echo.Context) error {
+func (client *ClientCore) HandlerDownload(c echo.Context) error {
 	token := c.FormValue("token")
 	urlsForm := c.FormValue("urls")
 	if token == client.Config.GetToken() {
@@ -88,4 +92,12 @@ func (client *ClientCore) HandlerDownloadPost(c echo.Context) error {
 	} else {
 		return c.HTML(http.StatusUnauthorized, "token error")
 	}
+}
+
+func (client *ClientCore) HandlerCss(c echo.Context) error {
+	return c.Blob(http.StatusOK, "text/css", []byte(css))
+}
+
+func (client *ClientCore) HandlerUnlock(c echo.Context) error {
+	return c.HTML(http.StatusOK, unlock)
 }
