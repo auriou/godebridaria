@@ -2,6 +2,10 @@
 
 Unlocks links through its alldebrid account and sends them to the aria2 server for download
 
+http://serveur:8080/unlock 
+
+![Drag Racing](./assets/unlock.png)
+
 ```
 
   ./godebridaria [OPTIONS]
@@ -63,4 +67,8 @@ $env:GOARCH = "amd64"<br>
 go build
 
 
+Next features :
+* Daemon
+* Config 
+ 
 https://godoc.org/github.com/takama/daemon
