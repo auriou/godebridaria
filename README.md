@@ -52,23 +52,41 @@ Your config save into data.json
 
 ---
 
-RASPBERRY 
+
+## Create DAEMON
+
+* Create file > *sudo nano /etc/systemd/system/godebridaria.service*
+> [Unit]<br>
+Description=godebrid for aria2<br>
+After=network.target<br>
+<br>
+[Service]<br>
+Type=simple<br>
+Restart=always<br>
+RestartSec=1<br>
+ExecStart=/home/user/debrid/godebridaria -p<br>
+WorkingDirectory=/home/user/debrid<br>
+<br>
+[Install]<br>
+WantedBy=multi-user.target<br>
+
+* Register DAEMON :  *sudo systemctl enable godebridaria*
+
+* View status DAEMON :  *sudo systemctl status godebridaria*
+
+
+## FOR BUILD
+
+* RASPBERRY 
 
 > go env <br>
 $env:GOOS = "linux"<br>
 $env:GOARCH = "arm"<br>
 go build
 
-LINUX 
+* LINUX 
 
 > go env <br>
 $env:GOOS = "linux"<br>
 $env:GOARCH = "amd64"<br>
 go build
-
-
-Next features :
-* Daemon
-* Config 
- 
-https://godoc.org/github.com/takama/daemon
