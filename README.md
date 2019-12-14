@@ -56,17 +56,23 @@ Your config save into data.json
 ## Create DAEMON
 
 * Create file > *sudo nano /etc/systemd/system/godebridaria.service*
-> [Unit]<br>
-Description=godebrid for aria2<br>
-After=network.target<br>
-[Service]<br>
-Type=simple<br>
-Restart=always<br>
-RestartSec=1<br>
-ExecStart=/home/user/debrid/godebridaria -p<br>
-WorkingDirectory=/home/user/debrid<br>
-[Install]<br>
-WantedBy=multi-user.target<br>
+
+```
+[Unit]
+Description=godebrid for aria2
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+ExecStart=/home/user/debrid/godebridaria -p
+WorkingDirectory=/home/user/debrid
+
+[Install]
+WantedBy=multi-user.target
+
+```
 
 * Register DAEMON :  *sudo systemctl enable godebridaria*
 
