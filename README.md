@@ -59,14 +59,12 @@ Your config save into data.json
 > [Unit]<br>
 Description=godebrid for aria2<br>
 After=network.target<br>
-<br>
 [Service]<br>
 Type=simple<br>
 Restart=always<br>
 RestartSec=1<br>
 ExecStart=/home/user/debrid/godebridaria -p<br>
 WorkingDirectory=/home/user/debrid<br>
-<br>
 [Install]<br>
 WantedBy=multi-user.target<br>
 
