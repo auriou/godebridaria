@@ -1,8 +1,12 @@
 package models
 
+type DataActivePinResponse struct {
+	Status string             `json:"status"`
+	Data   *ActivePinResponse `json:"data"`
+}
+
 type ActivePinResponse struct {
-	Success   bool   `json:"success"`
-	Token     string `json:"token"`
+	Apikey    string `json:"apikey"`
 	Activated bool   `json:"activated"`
 	ExpiresIn int    `json:"expires_in"`
 }

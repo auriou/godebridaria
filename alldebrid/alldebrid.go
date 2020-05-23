@@ -14,8 +14,8 @@ import (
 
 func New(cfg *config.ClientConfig) *ClientAlldebrid {
 	client := &ClientAlldebrid{
-		Base:          "https://api.alldebrid.com",
-		Agent:         "JDownloader",
+		Base:          "https://api.alldebrid.com/v4",
+		Agent:         "godebridaria",
 		HTTPClient:    http.DefaultClient,
 		ContextConfig: cfg,
 	}
@@ -36,7 +36,7 @@ func (c *ClientAlldebrid) GetReq(path string, queries Queries) *http.Request {
 			q.Add(k, v)
 		}
 		if c.ContextConfig.IsActivated() {
-			q.Set("token", c.ContextConfig.GetDebridToken())
+			q.Set("apikey", c.ContextConfig.GetDebridToken())
 		}
 		req.URL.RawQuery = q.Encode()
 	}
@@ -44,13 +44,13 @@ func (c *ClientAlldebrid) GetReq(path string, queries Queries) *http.Request {
 }
 
 func (c *ClientAlldebrid) GetHosts() (*models.DebridDomains, error) {
-	res, err := c.HTTPClient.Do(c.GetReq("/hosts", nil))
+	res, err := c.HTTPClient.Do(c.GetReq("/hosts/domains", Queries{}))
 	hosts := &models.DebridDomains{}
 	err = json.NewDecoder(res.Body).Decode(hosts)
 	if err != nil {
 		return nil, err
 	}
-	if !hosts.Success {
+	if hosts.Status != "success" {
 		return nil, errors.New("error : get hosts request")
 	}
 	c.ContextConfig.SaveHosts(hosts)
@@ -59,30 +59,30 @@ func (c *ClientAlldebrid) GetHosts() (*models.DebridDomains, error) {
 
 func (c *ClientAlldebrid) GetActivate() (*models.PinResponse, error) {
 	res, err := c.HTTPClient.Do(c.GetReq("/pin/get", Queries{}))
-	pin := &models.PinResponse{}
+	pin := &models.DataPinResponse{}
 	err = json.NewDecoder(res.Body).Decode(pin)
 	if err != nil {
 		return nil, err
 	}
-	if !pin.Success {
+	if pin.Status != "success" {
 		return nil, errors.New("error : get pin request")
 	}
-	c.ContextConfig.SavePin(pin)
-	return pin, nil
+	c.ContextConfig.SavePin(pin.Data)
+	return pin.Data, nil
 }
 
 func (c *ClientAlldebrid) SetActivate() (*models.ActivePinResponse, error) {
 	res, err := c.HTTPClient.Do(c.GetReq(c.ContextConfig.GetCheckURL(), nil))
-	pin := &models.ActivePinResponse{}
+	pin := &models.DataActivePinResponse{}
 	err = json.NewDecoder(res.Body).Decode(pin)
 	if err != nil {
 		return nil, err
 	}
-	if !pin.Success {
+	if pin.Status != "success" {
 		return nil, errors.New("error : activate pin request")
 	}
-	c.ContextConfig.SaveActivePin(pin)
-	return pin, nil
+	c.ContextConfig.SaveActivePin(pin.Data)
+	return pin.Data, nil
 }
 
 func (c *ClientAlldebrid) Activate() error {
@@ -139,7 +139,7 @@ func (c *ClientAlldebrid) Redirector(link string) (*models.RedirectorLinks, erro
 	if err != nil {
 		return nil, err
 	}
-	if !redirector.Success {
+	if redirector.Status != "success" {
 		return nil, errors.New("error : user get")
 	}
 	return redirector, nil
@@ -152,7 +152,7 @@ func (c *ClientAlldebrid) Unlock(link string) (*models.DownloadLink, error) {
 	if err != nil {
 		return nil, err
 	}
-	if !unlock.Success {
+	if unlock.Status != "success" {
 		return nil, errors.New("error : user get")
 	}
 	return unlock, nil
@@ -162,15 +162,15 @@ func (c *ClientAlldebrid) PrintDebrid(link string) {
 	debridType := c.ContextConfig.GetHostType(link)
 	if debridType == 1 {
 		redirect, _ := c.Redirector(link)
-		for _, value := range redirect.Links {
+		for _, value := range redirect.Data.Links {
 			linkDebrid, _ := c.Unlock(value)
 			fmt.Println("URL :", value)
-			fmt.Println("   + UNLOCK : ", linkDebrid.Infos.Link)
+			fmt.Println("   + UNLOCK : ", linkDebrid.Data.Link)
 		}
 	} else if debridType == 2 {
 		linkDebrid, _ := c.Unlock(link)
 		fmt.Println("URL :", link)
-		fmt.Println("   + UNLOCK : ", linkDebrid.Infos.Link)
+		fmt.Println("   + UNLOCK : ", linkDebrid.Data.Link)
 	}
 }
 
@@ -179,13 +179,13 @@ func (c *ClientAlldebrid) Debrid(link string) []string {
 	debridType := c.ContextConfig.GetHostType(link)
 	if debridType == 1 {
 		redirect, _ := c.Redirector(link)
-		for _, value := range redirect.Links {
+		for _, value := range redirect.Data.Links {
 			linkDebrid, _ := c.Unlock(value)
-			tab = append(tab, linkDebrid.Infos.Link)
+			tab = append(tab, linkDebrid.Data.Link)
 		}
 	} else if debridType == 2 {
 		linkDebrid, _ := c.Unlock(link)
-		tab = append(tab, linkDebrid.Infos.Link)
+		tab = append(tab, linkDebrid.Data.Link)
 	}
 	return tab
 }

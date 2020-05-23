@@ -9,7 +9,6 @@ import (
 	"github.com/auriou/godebridaria/aria2"
 	"github.com/auriou/godebridaria/config"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
 )
 
 var header = "<!doctype html><html lang='en'><head> <meta charset='utf-8'> <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'> <title>Download</title> <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' integrity='sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm' crossorigin='anonymous'> <link href='style.css' rel='stylesheet'></head><body class='text-center'> <form class='form-download' action='unlock' role='form' method='GET' class='form-horizontal'> <ul class='list-group'>"
@@ -42,6 +41,10 @@ func (c *ClientCore) Download(link string) []string {
 	return urls
 }
 
+func (c *ClientCore) Activate() {
+	c.Alldebrid.Activate()
+}
+
 func checkErr(err error) {
 	if err != nil {
 		panic(err)
@@ -57,11 +60,13 @@ func (c *ClientCore) StartApi() {
 	e := echo.New()
 
 	// Middleware
-	e.Use(middleware.Recover())
-	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: `{"time":"${time_rfc3339_nano}","ip":"${remote_ip}",` +
-			`"method":"${method}","uri":"${uri}","status":${status},"error":"${error}"}` + "\n",
-		Output: f}))
+	/*
+		e.Use(middleware.Recover())
+		e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+			Format: `{"time":"${time_rfc3339_nano}","ip":"${remote_ip}",` +
+				`"method":"${method}","uri":"${uri}","status":${status},"error":"${error}"}` + "\n",
+			Output: f}))
+	*/
 
 	e.Static("/", "assets")
 	// Routes

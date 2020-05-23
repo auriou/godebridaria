@@ -54,23 +54,14 @@ func (c *ClientConfig) SaveHosts(hosts *models.DebridDomains) {
 
 func (c *ClientConfig) GetHostType(link string) int {
 	urlAsk, _ := url.Parse(link)
-	for _, host := range c.Hosts.Hosts {
-		if host.Status {
-			if host.Domain == urlAsk.Host {
-				return 2
-			}
-			for _, altHost := range host.AltDomains {
-				if altHost == urlAsk.Host {
-					return 2
-				}
-			}
+	for _, host := range c.Hosts.Data.Hosts {
+		if host == urlAsk.Host {
+			return 2
 		}
 	}
-	for _, host := range c.Hosts.Redirectors {
-		if host.Status {
-			if host.Domain == urlAsk.Host {
-				return 1
-			}
+	for _, host := range c.Hosts.Data.Redirectors {
+		if host == urlAsk.Host {
+			return 1
 		}
 	}
 	return 0
@@ -101,7 +92,7 @@ func (c *ClientConfig) IsActivated() bool {
 }
 
 func (c *ClientConfig) GetDebridToken() string {
-	return c.Config.Activate.Token
+	return c.Config.Activate.Apikey
 }
 
 func (c *ClientConfig) GetCheckURL() string {
