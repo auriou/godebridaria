@@ -58,9 +58,9 @@ func init() {
 }
 
 func main() {
-	/*
+	/* TESTS
 		client := core.New()
-		client.Debrid("https://ed-protect.org/AS0y")
+		client.Debrid("******")
 	*/
 
 	if _, err := parser.Parse(); err != nil {
@@ -70,4 +70,5 @@ func main() {
 			os.Exit(1)
 		}
 	}
+
 }
